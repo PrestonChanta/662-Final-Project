@@ -92,3 +92,87 @@ typeOf g ( Leq l r ) = do { TBool <- typeOf g l;
 
 typeOf g ( IsZero n ) = do { TNum <- typeOf g n;
                             return TBool; }
+
+
+--Part2: Evaluation
+
+eval :: Env -> CJPTY -> Maybe CJPTY
+
+eval _ (Num n) = return (Num n)
+
+eval _ (Boolean b) = return (Boolean b)
+
+eval env (Plus l r) = do
+  Num n1 <- eval env l
+  Num n2 <- eval env r
+  return (Num (n1 + n2))
+
+eval env (Minus l r) = do
+  Num n1 <- eval env l
+  Num n2 <- eval env r
+  return (Num (n1 - n2))
+
+eval env (Mult l r) = do
+  Num n1 <- eval env l
+  Num n2 <- eval env r
+  return (Num (n1 * n2))
+
+eval env (Div l r) = do
+  Num n1 <- eval env l
+  Num n2 <- eval env r
+  if n2 == 0
+    then Nothing
+    else return (Num (n1 `div` n2))
+
+eval env (Exp l r) = do
+  Num n1 <- eval env l
+  Num n2 <- eval env r
+  return (Num (n1 ^ n2))
+
+eval env (Between n l r) = do
+  Num n' <- eval env n
+  Num l' <- eval env l
+  Num r' <- eval env r
+  return (Boolean (n' >= l' && n' <= r'))
+
+eval env (Lambda arg ty body) = return (Closure arg body env)
+
+eval env (App f a) = do
+  Closure arg body env' <- eval env f
+  argVal <- eval env a
+  eval ((arg, argVal):env') body
+
+eval env (Bind x v body) = do
+  val <- eval env v
+  eval ((x, val):env) body
+
+eval env (If c t e) = do
+  Boolean b <- eval env c
+  if b
+    then eval env t
+    else eval env e
+
+eval env (And l r) = do
+  Boolean b1 <- eval env l
+  Boolean b2 <- eval env r
+  return (Boolean (b1 && b2))
+
+eval env (Or l r) = do
+  Boolean b1 <- eval env l
+  Boolean b2 <- eval env r
+  return (Boolean (b1 || b2))
+
+eval env (Leq l r) = do
+  Num n1 <- eval env l
+  Num n2 <- eval env r
+  return (Boolean (n1 <= n2))
+
+eval env (IsZero n) = do
+  Num n' <- eval env n
+  return (Boolean (n' == 0))
+
+-- A closure is a lambda expression with an environment
+data Closure = Closure String CJPTY Env
+
+-- We represent evaluation failures with a Maybe type
+-- (e.g., division by zero or application of a non-closure)
