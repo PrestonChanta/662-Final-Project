@@ -10,7 +10,7 @@ data CJPTY where
     Div :: CJPTY -> CJPTY -> CJPTY
     Exp :: CJPTY -> CJPTY -> CJPTY
     Between :: CJPTY -> CJPTY -> CJPTY -> CJPTY
-    Lambda :: String -> CJPTY -> CJPTY
+    Lambda :: String -> CJPTYtype -> CJPTY -> CJPTY
     App :: CJPTY -> CJPTY -> CJPTY
     Bind :: String -> CJPTY -> CJPTY -> CJPTY
     If :: CJPTY -> CJPTY -> CJPTY -> CJPTY
@@ -23,6 +23,7 @@ data CJPTY where
 data CJPTYtype where
     TNum :: CJPTYtype
     TBool :: CJPTYtype
+    (:->:) :: CJPTYtype -> CJPTYtype -> CJPTYtype
     deriving (Show, Eq)
 
 type Env = [(String, CJPTY)]
@@ -62,11 +63,15 @@ typeOf g ( Between n l r ) = do { TNum <- typeOf g n;
                                   TNum <- typeOf g r;
                                   return TBool; }    
 
--- Lambda --
+typeOf g ( Lambda i d b ) = do { r <- typeOf ((i,d):g) b;
+                                 return (d :->: r )}
 
--- App --
+typeOf g ( App f a ) = do { a' <- typeOf g a;
+                            d :->: r <- typeOf g f;
+                            if a' == d then return r else Nothing}
 
--- Bind -- 
+typeOf g ( Bind i v b ) = do { tv <- typeOf g v;
+                               typeOf ((i,tv):g) b }
 
 typeOf g ( If c t e ) = do { TBool <- typeOf g c;
                              t' <- typeOf g t;
