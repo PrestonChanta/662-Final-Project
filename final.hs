@@ -96,8 +96,8 @@ typeOf g ( Or l r ) = do { TBool <- typeOf g l;
                            TBool <- typeOf g r;
                            return TBool; }
 
-typeOf g ( Leq l r ) = do { TBool <- typeOf g l;
-                            TBool <- typeOf g r;
+typeOf g ( Leq l r ) = do { TNum <- typeOf g l;
+                            TNum <- typeOf g r;
                             return TBool; }
 
 typeOf g ( IsZero n ) = do { TNum <- typeOf g n;
