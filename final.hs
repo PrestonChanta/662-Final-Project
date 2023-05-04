@@ -42,7 +42,7 @@ type Cont = [(String, CJPTYtype)]
 
 typeOf :: Cont -> CJPTY -> Maybe CJPTYtype
 
-typeOf _ ( Num n ) = if n<0 then Nothing else return TNum
+typeOf _ ( Num n ) = return TNum
 
 typeOf _ ( Boolean b ) = return TBool
 
@@ -192,7 +192,7 @@ eval env (Fix f) = do{
     eval env' (subst i (Fix (Lambda i (TNum) b)) b)
 }
 
---prat3
+-- Part 3: Fixed Point Operator
 
 subst:: String -> CJPTY -> CJPTY -> CJPTY
 subst i v (Num x) = (Num x)
@@ -214,6 +214,19 @@ subst i v (Bind i' v' b) = if i == i' then (Bind i' (subst i v v') b)
 subst i v (Lambda i' t b) = (Lambda i' t (subst i v b))
 subst i v (Fix f) = (Fix (subst i v f))
 
+
+-- Part 4: New Language Feature
+-- Out new feature is the implementation of negative numbers which 
+-- has been implemented throughout the functions
+
+
+-- Part 5: Interpretation
+-- Combine TypeOf & Eval methods into a single function
+-- Finds input type & evaluates only if an input is found
+interp :: CJPTY -> (Maybe CJPTYVal)
+interp exp = case typeOf [] exp of
+    Nothing -> Nothing
+    _ -> eval [] exp
 
 -- A closure is a lambda expression with an environment
 --data Closure = Closure String CJPTY Env
