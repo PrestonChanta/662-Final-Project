@@ -197,7 +197,7 @@ eval env (Fix f) = do{
 subst:: String -> CJPTY -> CJPTY -> CJPTY
 subst i v (Num x) = (Num x)
 subst i v (Boolean x) = (Boolean x)
-subst i v (Id i') = if i == i' then v else (Id i') 
+subst i v (Id i') = if i==i' then v else (Id i')
 subst i v (Plus x y) = (Plus (subst i v x) (subst i v y))
 subst i v (Minus x y) = (Minus (subst i v x) (subst i v y))
 subst i v (Mult x y) = (Mult (subst i v x) (subst i v y))
@@ -209,10 +209,11 @@ subst i v (Or x y) = (Or (subst i v x) (subst i v y))
 subst i v (Leq x y) = (Leq (subst i v x) (subst i v y))
 subst i v (IsZero x) = (IsZero (subst i v x))
 subst i v (If x y z) = (If (subst i v x) (subst i v y) (subst i v z))
+subst i v (Fix f) = Fix (subst i v f)
 subst i v (Bind i' v' b) = if i == i' then (Bind i' (subst i v v') b)
  else (Bind i' (subst i v v') (subst i v b))
-subst i v (Lambda i' t b) = (Lambda i' t (subst i v b))
-subst i v (Fix f) = (Fix (subst i v f))
+subst i v (Lambda i' d b) = if i==i' then (Lambda i' d b) else (Lambda i' d (subst i v b))
+subst i v (App f a) = App (subst i v f) (subst i v a)
 
 
 -- Part 4: New Language Feature
