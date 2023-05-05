@@ -232,5 +232,10 @@ interp exp = case typeOf [] exp of
 -- A closure is a lambda expression with an environment
 --data Closure = Closure String CJPTY Env
 
+testFix = (Bind "a" (Lambda "b" ((:->:) TNum TNum)
+            (Lambda "x" TNum (If (IsZero (Id "x"))                                     
+              (Num 1)     
+                (Plus (Id "x") (App (Id "b") (Minus (Id "x") (Num 1)))))))
+          (App (Fix (Id "a")) (Num 4))) 
 -- We represent evaluation failures with a Maybe type
 -- (e.g., division by zero or application of a non-closure)
